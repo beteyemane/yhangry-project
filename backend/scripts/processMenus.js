@@ -100,6 +100,33 @@ async function insertCuisines(menuId, cuisines) {
   }
 }
 
+async function updateCuisineStats() {
+  try {
+    const updateStatsQuery = `
+      UPDATE cuisines
+      SET 
+        number_of_orders = subquery.total_orders,
+        set_menus_count = subquery.live_menus
+      FROM (
+        SELECT 
+          c.id AS cuisine_id,
+          SUM(m.number_of_orders) AS total_orders,
+          COUNT(mc.menu_id) AS live_menus
+        FROM cuisines c
+        LEFT JOIN menu_cuisines mc ON c.id = mc.cuisine_id
+        LEFT JOIN menus m ON mc.menu_id = m.id AND m.status = TRUE
+        GROUP BY c.id
+      ) AS subquery
+      WHERE cuisines.id = subquery.cuisine_id;
+    `;
+
+    await client.query(updateStatsQuery);
+    console.log('Cuisine statistics updated successfully.');
+  } catch (error) {
+    console.error('Error updating cuisine statistics:', error.message);
+  }
+}
+
 async function getMenus() {
   try {
     console.log('Connecting to the database...');
@@ -115,6 +142,8 @@ async function getMenus() {
       // wait for 1 second before making next API call
       await delay(1000); 
     }
+    
+    await updateCuisineStats()
 
     console.log('All menus have been processed.');
   } catch (error) {
