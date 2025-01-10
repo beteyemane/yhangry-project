@@ -10,7 +10,7 @@ const PORT = process.env.PORT;
 app.use(cors());
 app.use(bodyParser.json());
 
-app.use('/api', setMenusRoutes);
+app.use('/api/set-menus', setMenusRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
