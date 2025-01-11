@@ -2,6 +2,7 @@ import React from 'react';
 
 const Filters = ({ cuisines, onFilter }) => (
     <div className="cuisines-filters">
+        <p className="sub-title">Filters:</p>
         <button onClick={() => onFilter(null)}>All</button>
         {cuisines.map((cuisine) => (
             <button key={cuisine.id} onClick={() => onFilter(cuisine.slug)}>

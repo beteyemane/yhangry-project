@@ -21,17 +21,21 @@ const SetMenusPage = () => {
 
     return (
         <div className="set-menus-page">
-            <h1>Set Menus</h1>
+            <h1 className="title">Set Menus</h1>
 
             <div className="filters">
-                <Filters cuisines={cuisines} onFilter={handleCuisineFilter} />
-                <input
+                <div className="guests-container">
+                    <input
+                    className="guests-input"
                     type="number"
                     value={guests}
                     onChange={handleGuestsChange}
                     min="1"
                     placeholder="Guests"
-                />
+                    />
+                    <p>Guests</p>
+                </div>             
+            <Filters cuisines={cuisines} onFilter={handleCuisineFilter} />
             </div>
 
             <div className="menus">
