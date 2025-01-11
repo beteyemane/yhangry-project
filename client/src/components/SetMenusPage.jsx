@@ -12,12 +12,18 @@ const SetMenusPage = () => {
     const [page, setPage] = useState(1);
 
     useEffect(() => {
-        dispatch(fetchSetMenus(cuisineSlug, page, 10, guests));
-    }, [cuisineSlug, page, guests, dispatch]);
+        dispatch(fetchSetMenus(cuisineSlug, page, 10));
+    }, [cuisineSlug, page, dispatch]);
 
     const handleGuestsChange = (e) => setGuests(e.target.value);
     const handleCuisineFilter = (slug) => setCuisineSlug(slug);
     const loadMore = () => setPage((prevPage) => prevPage + 1);
+    const handleIncrement = () => {
+        setGuests((prevCount) => prevCount + 1);
+    };
+    const handleDecrement = () => {
+        setGuests((prevCount) => (prevCount > 1 ? prevCount - 1 : 1));
+    };
 
     return (
         <div className="set-menus-page">
@@ -25,29 +31,38 @@ const SetMenusPage = () => {
 
             <div className="filters">
                 <div className="guests-container">
-                    <input
-                    className="guests-input"
-                    type="number"
-                    value={guests}
-                    onChange={handleGuestsChange}
-                    min="1"
-                    placeholder="Guests"
-                    />
+                    <div className="button-guests-container">
+                        <button className='guests-button decrement' type="button" onClick={handleDecrement} disabled={guests <= 1}>
+                        -
+                        </button>
+                        <input
+                        className="guests-input"
+                        type="number"
+                        value={guests}
+                        onChange={handleGuestsChange}
+                        min="1"
+                        placeholder="Guests"
+                        />
+                        <button className='guests-button increment' type="button" onClick={handleIncrement}>
+                        +
+                        </button>
+                     </div>
                     <p>Guests</p>
-                </div>             
-            <Filters cuisines={cuisines} onFilter={handleCuisineFilter} />
+                </div>
+            <Filters cuisines={cuisines} onFilter={handleCuisineFilter} total={pagination.total} selectedCuisine={cuisineSlug}/>
             </div>
 
             <div className="menus">
                 {loading && <p>Loading...</p>}
                 {error && <p>Error: {error}</p>}
-                {setMenus.map((menu) => (
-                    <SetMenuCard key={menu.id} menu={menu} />
-                ))}
+                {setMenus.map((menu) => {
+                    const totalPrice = Math.max(menu.price_per_person * guests);
+                    return <SetMenuCard key={menu.id} menu={{ ...menu, totalPrice }} />;
+                })}
             </div>
 
             {pagination.page < Math.ceil(pagination.total / pagination.limit) && (
-                <button onClick={loadMore}>Show More</button>
+                <button className="button load-more" onClick={loadMore}>Load more</button>
             )}
         </div>
     );

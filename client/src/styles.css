@@ -7,6 +7,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-self: center;
+    margin-bottom: 20px;
 
 }
 
@@ -28,7 +29,7 @@ body {
 
 .menu-name {
     font-size: 15px;
-    margin-bottom: 0;
+    margin: 8px 0 0 0;
 }
 
 .menu-description {
@@ -60,14 +61,27 @@ body {
     width: 80px;
     text-align: center;
     margin-right: 10px;
+    border-radius: 18px;
 }
 
-button {
+.button {
     background: none;
     padding: 5px;
-    border: 1px solid black;
+    border: 1px solid #000;
     border-radius: 15px;
     margin-right: 5px;
+    width: fit-content;
+}
+
+.button:hover {
+  background-color: #000;
+  color: #fff;
+  cursor: pointer;
+}
+
+.load-more {
+    display: flex;
+    align-self: center;
 }
 
 img {
@@ -76,4 +90,53 @@ img {
     clip-path: content-box;
     object-fit: cover;
     border-radius: 2%;
+}
+
+.cuisine-tag {
+    margin: 0;
+    font-size: 12px;
+    padding: 6px;
+    background-color: #052b45;
+    color: #fff;
+    width: fit-content;
+    border-radius: 5px;
+}
+
+.button-guests-container {
+    position: relative;
+}
+
+.guests-button {
+    border: none;
+    background-color: #c8cdd3;
+    position: absolute;
+    top: 5px;
+}
+
+.guests-button:hover {
+    cursor: pointer;
+}
+
+.increment {
+    top: 5px;
+    right: 18px;
+}
+
+.decrement {
+    left: 5px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.selected {
+    background-color: #000;
+    color: #fff;
 }

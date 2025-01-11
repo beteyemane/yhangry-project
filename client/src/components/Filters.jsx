@@ -1,11 +1,11 @@
 import React from 'react';
 
-const Filters = ({ cuisines, onFilter }) => (
+const Filters = ({ cuisines, onFilter, total, selectedCuisine}) => (
     <div className="cuisines-filters">
         <p className="sub-title">Filters:</p>
-        <button onClick={() => onFilter(null)}>All</button>
+        <button className={`button ${!selectedCuisine ? 'selected' : ''}`} onClick={() => onFilter(null)}>All ({total})</button>
         {cuisines.map((cuisine) => (
-            <button key={cuisine.id} onClick={() => onFilter(cuisine.slug)}>
+            <button className={`button ${selectedCuisine === cuisine.slug ? 'selected' : ''}`} key={cuisine.id} onClick={() => onFilter(cuisine.slug)}>
                 {cuisine.name} ({cuisine.set_menus_count})
             </button>
         ))}

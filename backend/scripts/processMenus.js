@@ -1,7 +1,7 @@
 const axios = require('axios');
 const { Client } = require('pg');
 const dotenv = require('dotenv');
-
+const generateSlug = require('../utils/slug');
 dotenv.config();
 
 const client = new Client({
@@ -11,6 +11,7 @@ const client = new Client({
   port: process.env.DB_PORT
 });
 
+// 1 requests per second
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function fetchMenus() {
@@ -76,28 +77,34 @@ async function insertMenu(menu) {
 }
 
 async function insertCuisines(menuId, cuisines) {
-  for (const cuisine of cuisines) {
-    const selectCuisineQuery = `SELECT id FROM cuisines WHERE name = $1`;
-    const cuisineResult = await client.query(selectCuisineQuery, [cuisine.name]);
+    for (const cuisine of cuisines) {
+        const slug = generateSlug(cuisine.name); 
 
-    let cuisineId;
-    if (cuisineResult.rows.length > 0) {
-      cuisineId = cuisineResult.rows[0].id;
-    } else {
-      const insertCuisineQuery = `INSERT INTO cuisines (name) VALUES ($1) RETURNING id`;
-      const newCuisineResult = await client.query(insertCuisineQuery, [cuisine.name]);
-      cuisineId = newCuisineResult.rows[0].id;
+        const selectCuisineQuery = `SELECT id FROM cuisines WHERE slug = $1`;
+        const cuisineResult = await client.query(selectCuisineQuery, [slug]);
+
+        let cuisineId;
+        if (cuisineResult.rows.length > 0) {
+            cuisineId = cuisineResult.rows[0].id;
+        } else {
+            const insertCuisineQuery = `
+                INSERT INTO cuisines (name, slug) 
+                VALUES ($1, $2) 
+                RETURNING id;
+            `;
+            const newCuisineResult = await client.query(insertCuisineQuery, [cuisine.name, slug]);
+            cuisineId = newCuisineResult.rows[0].id;
+        }
+
+        const insertMenuCuisineQuery = `
+            INSERT INTO menu_cuisines (menu_id, cuisine_id)
+            SELECT $1, $2
+            WHERE NOT EXISTS (
+                SELECT 1 FROM menu_cuisines WHERE menu_id = $1 AND cuisine_id = $2
+            );
+        `;
+        await client.query(insertMenuCuisineQuery, [menuId, cuisineId]);
     }
-
-    const insertMenuCuisineQuery = `
-      INSERT INTO menu_cuisines (menu_id, cuisine_id)
-      SELECT $1, $2
-      WHERE NOT EXISTS (
-        SELECT 1 FROM menu_cuisines WHERE menu_id = $1 AND cuisine_id = $2
-      );
-    `;
-    await client.query(insertMenuCuisineQuery, [menuId, cuisineId]);
-  }
 }
 
 async function updateCuisineStats() {
