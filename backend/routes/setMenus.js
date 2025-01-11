@@ -16,6 +16,7 @@ router.get('/', async (req, res) => {
     const offset = (page - 1) * limit;
 
     try {
+        // Fetch menus with their related cuisines
         const setMenusQuery = `
             SELECT 
                 menus.id, 
@@ -23,18 +24,28 @@ router.get('/', async (req, res) => {
                 menus.description, 
                 menus.image, 
                 menus.price_per_person, 
-                menus.number_of_orders
+                menus.number_of_orders,
+                json_agg(
+                    json_build_object(
+                        'id', cuisines.id,
+                        'name', cuisines.name,
+                        'slug', cuisines.slug
+                    )
+                ) AS cuisines
             FROM menus
             LEFT JOIN menu_cuisines ON menus.id = menu_cuisines.menu_id
             LEFT JOIN cuisines ON cuisines.id = menu_cuisines.cuisine_id
             WHERE menus.status = TRUE
             AND ($1::TEXT IS NULL OR cuisines.slug = $1)
+            GROUP BY menus.id
             ORDER BY menus.number_of_orders DESC
             LIMIT $2 OFFSET $3;
         `;
+
         const setMenusValues = [cuisineSlug || null, parseInt(limit), parseInt(offset)];
         const { rows: setMenus } = await client.query(setMenusQuery, setMenusValues);
 
+        // Fetch all cuisines for the filters
         const cuisinesQuery = `
             SELECT 
                 cuisines.id, 
@@ -50,6 +61,7 @@ router.get('/', async (req, res) => {
         `;
         const { rows: cuisines } = await client.query(cuisinesQuery);
 
+        // Fetch total count of menus
         const countQuery = `
             SELECT COUNT(*) AS total
             FROM menus
