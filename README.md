@@ -48,7 +48,46 @@ To run the app locally, ensure you have the following installed:
   DB_NAME=your-database-name
   REACT_APP_API_SET_MENUS_URL=http://localhost:5000/api/set-menus
 ```
-4. After setting up the .env file, you need to run the script that will fetch menus and cuisines data and populate your database:
+
+### Setting up the Database
+
+To run the project locally, you'll need a PostgreSQL database with the following setup:
+
+. **Create a PostgreSQL database**: Ensure that PostgreSQL is installed locally and create a database named `your_database_name` or modify the configuration file to use a different database.
+
+. **Create Tables**: You need to create two tables: `menus` and `cuisines`.
+
+Here’s an example of the SQL commands to create the required tables:
+
+```sql
+-- Create cuisines table
+CREATE TABLE cuisines (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) NOT NULL UNIQUE,
+    number_of_orders INT DEFAULT 0
+);
+
+-- Create menus table
+CREATE TABLE menus (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    price_per_person DECIMAL(10, 2),
+    number_of_orders INT DEFAULT 0,
+    image VARCHAR(255),
+    status BOOLEAN DEFAULT TRUE
+);
+
+-- Create a join table for many-to-many relationship
+CREATE TABLE menu_cuisines (
+    menu_id INT REFERENCES menus(id) ON DELETE CASCADE,
+    cuisine_id INT REFERENCES cuisines(id) ON DELETE CASCADE,
+    PRIMARY KEY (menu_id, cuisine_id)
+);
+```
+
+4. You will then need to run the script that will fetch menus and cuisines data and populate your database:
   
 ``` 
 npm run populate-menus
